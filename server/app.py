@@ -25,18 +25,13 @@ class Signup(Resource):
         user.password_hash = json['password']
         db.session.add(user)
         db.session.commit()
-        session['user_id'] = user.id
         return user.to_dict(), 201
 
 class CheckSession(Resource):
     def get(self):
-        user_id = session.get('user_id')
-        if user_id:
-            user = User.query.get(user_id)
-            if user:
-                return jsonify(user.to_dict()), 200
-        return {}, 204
-
+        if not session.get('user_id'):
+            return {}, 204
+        return User.query.filter(User.id == session['user_id']).first().to_dict()
 class Login(Resource):
     def post(self):
         json = request.get_json()
